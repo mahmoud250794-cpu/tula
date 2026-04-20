@@ -6,7 +6,40 @@
   <title>Tula - لوحة التحكم</title>
 </head>
 <body>
+  <!-- Netlify Identity Widget -->
   <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  
+  <script>
+    // معالجة الروابط القادمة من الإيميل (تفعيل، إعادة تعيين كلمة مرور، دعوة)
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", function(user) {
+        // إذا كان هناك توكن في الرابط (من الإيميل)
+        const hash = window.location.hash;
+        if (hash && (hash.includes('invite_token') || hash.includes('confirmation_token') || hash.includes('recovery_token'))) {
+          // ابقَ في الصفحة ليتعامل الويدجت مع التوكن
+          return;
+        }
+        
+        // إذا لم يكن هناك مستخدم مسجّل، افتح نافذة الدخول
+        if (!user) {
+          // لا تفتح النافذة تلقائياً إذا كان المستخدم في صفحة الدخول أصلاً
+          if (!window.location.pathname.includes('/admin')) {
+            window.netlifyIdentity.open("login");
+          }
+        }
+      });
+      
+      // بعد نجاح الدخول أو تفعيل الحساب
+      window.netlifyIdentity.on("login", function(user) {
+        // تأكد من البقاء في لوحة التحكم
+        if (window.location.pathname !== '/admin' && window.location.pathname !== '/admin/') {
+          window.location.href = '/admin';
+        }
+      });
+    }
+  </script>
+  
+  <!-- Decap CMS -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 </body>
 </html>
